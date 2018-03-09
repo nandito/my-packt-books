@@ -1,0 +1,11 @@
+{
+  "name": "my-packt-books",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Nandor Biro",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2"
+  }
+}
