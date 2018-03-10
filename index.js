@@ -4,6 +4,7 @@ require('dotenv').load({
 
 var request = require('request');
 var cheerio = require('cheerio');
+var fs = require('fs');
 var loginDetails = {
   email: process.env.PACKT_EMAIL,
   password: process.env.PACKT_PASSWORD,
@@ -64,36 +65,90 @@ request(url, function (err, res, body) {
         return;
       }
 
-      scrape(
-        body,
-        (data) => {
-          console.log(err || data);
+      scrape(body)
+        .then(bookData => {
+          console.log('Scraping is finished, save data!')
+          saveToFile(bookData)
         })
-
-      console.log('----------- Packt My Books Fetching Done --------------');
+        .catch(error => {
+          console.log(error)
+        })
+        .then(() => {
+          console.log('----------- Packt My Books Fetching Done --------------');
+        })
     });
   });
 });
 
-function scrape(body, callback) {
-  let $ = cheerio.load(body), pageData = []
+function saveToFile(data) {
+  const output = `${__dirname}/data/data.json`
   
-  $('.product-line').each((index, item) => {
-    const title = $(item).find('.title').text().trim()
-    const href = $(item).find('.product-thumbnail a').attr('href')
+  fs.writeFile(output, JSON.stringify(data, null, 2), 'utf-8');
+}
 
-    if (!title) {
-      return null
+function scrape(body) {
+  let $ = cheerio.load(body)
+  const productListLength = $('.product-line').length
+  console.log('productListLength: ', productListLength)
+  
+  const pageData = []
+  let downloadedFiles = 0
+  let falseItems = 0
+
+  return new Promise((resolve) => {
+    $('.product-line').each((index, item) => {
+      const title = $(item).find('.title').text().trim()
+  
+      if (!title) {
+        falseItems += 1
+
+        return null
+      }
+  
+      const href = $(item).find('.product-thumbnail a').attr('href')
+      const link = 'https://www.packtpub.com' + href
+      const category = href.split('/')[1]
+      const safeName = href.split('/')[2]
+      const coverUrl = $(item).find('.product-thumbnail img').attr('data-original')
+      
+      getCover(coverUrl, safeName)
+        .then((coverImageSrc) => {
+          pageData.push({ title, link, category, coverImageSrc })
+          downloadedFiles += 1
+          console.log('Download success: ', downloadedFiles, title)
+
+          if (downloadedFiles === (productListLength - falseItems)) {
+            console.log('Download is finished!')
+            console.log('downloadedFiles: ', downloadedFiles)
+            console.log('falseItems: ', falseItems)
+            
+            resolve(pageData)
+          }
+        })
+    })
+  })
+}
+
+function getCover(coverUrl, filename) {
+  const extension = coverUrl.split('.').slice(-1)[0]
+  const relativeSrc = `covers/${filename}.${extension}`
+  const output = `${__dirname}/data/${relativeSrc}`
+
+  return new Promise((resolve, reject) => {
+    if (!coverUrl || !filename) {
+      resolve('Cannot get cover.')
     }
 
-    pageData.push(
-      {
-        title,
-        link: 'https://www.packtpub.com/' + href,
-        category: href.split('/')[1],
-      }
-    )
+    request(`https:${coverUrl}`, { timeout: 5000 })
+      .on('error', function () {
+        resolve(`Request failed getting file for ${filename}`)
+      })
+      .pipe(fs.createWriteStream(output))
+      .on('close', function () {
+        resolve(relativeSrc)
+      })
+      .on('error', function () {
+        resolve(`Failed downloading file for ${filename}`)
+      })
   })
-
-  callback(pageData);
 }
