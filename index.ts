@@ -87,12 +87,19 @@ function saveToFile(data) {
   fs.writeFile(output, JSON.stringify(data, null, 2), 'utf-8')
 }
 
-function scrape(body) {
+type Book = {
+  title: string
+  link: string
+  category: string
+  coverImageSrc: string
+}
+
+function scrape(body): Promise<Array<Book>> {
   let $ = cheerio.load(body)
   const productListLength = $('.product-line').length
   console.log('productListLength: ', productListLength)
   
-  const pageData = []
+  const pageData : Array<Book> = []
   let downloadedFiles = 0
   let falseItems = 0
 
@@ -130,12 +137,12 @@ function scrape(body) {
   })
 }
 
-function getCover(coverUrl, filename) {
-  const extension = coverUrl.split('.').slice(-1)[0]
-  const relativeSrc = `covers/${filename}.${extension}`
-  const output = `${__dirname}/data/${relativeSrc}`
+function getCover(coverUrl: string, filename: string) : Promise<string> {
+  const extension : string = coverUrl.split('.').slice(-1)[0]
+  const relativeSrc : string = `covers/${filename}.${extension}`
+  const output : string = `${__dirname}/data/${relativeSrc}`
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve : (value : string) => void) => {
     if (!coverUrl || !filename) {
       resolve('Cannot get cover.')
     }
