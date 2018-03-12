@@ -4,7 +4,7 @@ require('dotenv').load({
 
 import request from 'request'
 import cheerio from 'cheerio'
-import fs from 'fs'
+import fs, { WriteStream } from 'fs'
 
 const loginDetails = {
   email: process.env.PACKT_EMAIL,
@@ -69,22 +69,33 @@ baseRequest(url, function (err, res, body) {
       scrape(body)
         .then(bookData => {
           console.log('Scraping is finished, save data!')
-          saveToFile(bookData)
+          return saveToFile(bookData)
+        })
+        .then((message) => {
+          console.log(message)
+          console.log('----------- Packt My Books Fetching Done --------------')
         })
         .catch(error => {
-          console.log(error)
-        })
-        .then(() => {
+          console.error(error)
           console.log('----------- Packt My Books Fetching Done --------------')
         })
     })
   })
 })
 
-function saveToFile(data) {
-  const output = `${__dirname}/data/data.json`
+function saveToFile(data: Array<Book>) : Promise<string | NodeJS.ErrnoException> {
+  const output: string = `${__dirname}/data/data.json`
+
+  return new Promise((resolve, reject) => {
+    fs.writeFile(output, JSON.stringify(data, null, 2), (err) => {
+      if (err) {
+        reject(err)
   
-  fs.writeFile(output, JSON.stringify(data, null, 2), 'utf-8')
+        return
+      }
+      resolve('File has been created!')
+    })
+  })
 }
 
 type Book = {

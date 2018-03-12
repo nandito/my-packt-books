@@ -63,12 +63,14 @@ baseRequest(url, function (err, res, body) {
             scrape(body)
                 .then(bookData => {
                 console.log('Scraping is finished, save data!');
-                saveToFile(bookData);
+                return saveToFile(bookData);
+            })
+                .then((message) => {
+                console.log(message);
+                console.log('----------- Packt My Books Fetching Done --------------');
             })
                 .catch(error => {
-                console.log(error);
-            })
-                .then(() => {
+                console.error(error);
                 console.log('----------- Packt My Books Fetching Done --------------');
             });
         });
@@ -76,7 +78,15 @@ baseRequest(url, function (err, res, body) {
 });
 function saveToFile(data) {
     const output = `${__dirname}/data/data.json`;
-    fs_1.default.writeFile(output, JSON.stringify(data, null, 2), 'utf-8');
+    return new Promise((resolve, reject) => {
+        fs_1.default.writeFile(output, JSON.stringify(data, null, 2), (err) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve('File has been created!');
+        });
+    });
 }
 function scrape(body) {
     let $ = cheerio_1.default.load(body);
