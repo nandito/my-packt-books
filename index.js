@@ -16,14 +16,15 @@ const loginDetails = {
     form_id: "packt_user_login_form",
     form_build_id: ""
 };
-const loginError = 'Sorry, you entered an invalid email address and password combination.';
-const url = 'https://www.packtpub.com/packt/offers/free-learning';
+const LOGIN_ERROR_MESSAGE = 'Sorry, you entered an invalid email address and password combination.';
+const BASE_URL = 'https://www.packtpub.com';
+const FREE_LEARNING_URL = `${BASE_URL}/packt/offers/free-learning`;
 //we need cookies for that, therefore let's turn JAR on
 const baseRequest = request_1.default.defaults({
     jar: true
 });
 console.log('----------- Packt My Books Fetching Started -----------');
-baseRequest(url, function (err, res, body) {
+baseRequest(FREE_LEARNING_URL, function (err, res, body) {
     if (err) {
         console.error('Request failed');
         console.log('----------- Packt My Books Fetching Done --------------');
@@ -35,7 +36,7 @@ baseRequest(url, function (err, res, body) {
         loginDetails.form_build_id = newFormId;
     }
     baseRequest.post({
-        uri: url,
+        uri: FREE_LEARNING_URL,
         headers: {
             'content-type': 'application/x-www-form-urlencoded'
         },
@@ -47,7 +48,7 @@ baseRequest(url, function (err, res, body) {
             return;
         }
         const $ = cheerio_1.default.load(body);
-        const loginFailed = $("div.error:contains('" + loginError + "')");
+        const loginFailed = $("div.error:contains('" + LOGIN_ERROR_MESSAGE + "')");
         if (loginFailed.length) {
             console.error('Login failed, please check your email address and password');
             console.log('Login failed, please check your email address and password');

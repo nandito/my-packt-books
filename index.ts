@@ -4,7 +4,7 @@ require('dotenv').load({
 
 import request from 'request'
 import cheerio from 'cheerio'
-import fs, { WriteStream } from 'fs'
+import fs from 'fs'
 
 const loginDetails = {
   email: process.env.PACKT_EMAIL,
@@ -13,8 +13,9 @@ const loginDetails = {
   form_id: "packt_user_login_form",
   form_build_id: ""
 }
-const loginError = 'Sorry, you entered an invalid email address and password combination.'
-const url = 'https://www.packtpub.com/packt/offers/free-learning'
+const LOGIN_ERROR_MESSAGE: string = 'Sorry, you entered an invalid email address and password combination.'
+const BASE_URL: string = 'https://www.packtpub.com'
+const FREE_LEARNING_URL: string = `${BASE_URL}/packt/offers/free-learning`
 
 //we need cookies for that, therefore let's turn JAR on
 const baseRequest = request.defaults({
@@ -22,7 +23,7 @@ const baseRequest = request.defaults({
 })
 
 console.log('----------- Packt My Books Fetching Started -----------')
-baseRequest(url, function (err, res, body) {
+baseRequest(FREE_LEARNING_URL, function (err, res, body) {
   if (err) {
     console.error('Request failed')
     console.log('----------- Packt My Books Fetching Done --------------')
@@ -38,7 +39,7 @@ baseRequest(url, function (err, res, body) {
   }
 
   baseRequest.post({
-    uri: url,
+    uri: FREE_LEARNING_URL,
     headers: {
       'content-type': 'application/x-www-form-urlencoded'
     },
@@ -51,7 +52,7 @@ baseRequest(url, function (err, res, body) {
     }
     const $ = cheerio.load(body)
     
-    const loginFailed = $("div.error:contains('" + loginError + "')")
+    const loginFailed = $("div.error:contains('" + LOGIN_ERROR_MESSAGE + "')")
     if (loginFailed.length) {
       console.error('Login failed, please check your email address and password')
       console.log('Login failed, please check your email address and password')
@@ -151,7 +152,7 @@ function scrape(body): Promise<Array<Book>> {
 function getCover(coverUrl: string, filename: string) : Promise<string> {
   const extension : string = coverUrl.split('.').slice(-1)[0]
   const relativeSrc : string = `covers/${filename}.${extension}`
-  const output : string = `${__dirname}/data/${relativeSrc}`
+  const output : fs.PathLike = `${__dirname}/data/${relativeSrc}`
 
   return new Promise((resolve : (value : string) => void) => {
     if (!coverUrl || !filename) {
