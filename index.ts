@@ -3,6 +3,7 @@ require('dotenv').load({
 })
 
 import request from 'request'
+import rp from 'request-promise'
 import cheerio from 'cheerio'
 import fs from 'fs'
 import { saveDataFile } from './modules/data-file-saver'
@@ -11,6 +12,7 @@ import {
   BASE_URL,
   FREE_LEARNING_URL,
   LOGIN_ERROR_MESSAGE,
+  MY_EBOOKS_URL,
   PROJECT_ROOT,
   loginDetails,
 } from './constants'
@@ -19,68 +21,94 @@ import {
 const baseRequest = request.defaults({
   jar: true
 })
+const baseRp = rp.defaults({
+  jar: true
+})
 
-console.log('----------- Packt My Books Fetching Started -----------')
-baseRequest(FREE_LEARNING_URL, function (err, res, body) {
-  if (err) {
-    console.error('Request failed')
-    console.log('----------- Packt My Books Fetching Done --------------')
-    return
-  }
+const logTitle = (title) => {
+  console.log(`----------- ${title} -----------`)
+}
 
-  const $ = cheerio.load(body)
+const loginToPackt = () => {
+  logTitle('Login started')
+  
+  return getLoginFormId()
+    .then(loginFormId => {
+      if (loginFormId) {
+        loginDetails.form_build_id = loginFormId
+      }
 
-  const newFormId = $("input[type='hidden'][id^=form][value^=form]").val()
+      return submitLoginCredentials()
+    })
+}
 
-  if (newFormId) {
-    loginDetails.form_build_id = newFormId
-  }
-
-  baseRequest.post({
+const submitLoginCredentials = () => {
+  const options = {
     uri: FREE_LEARNING_URL,
+    method: 'POST',
     headers: {
       'content-type': 'application/x-www-form-urlencoded'
     },
-    body: require('querystring').stringify(loginDetails)
-  }, function (err, res, body) {
-    if (err) {
-      console.error('Login failed')
-      console.log('----------- Packt My Books Fetching Done --------------')
-      return
-    }
-    const $ = cheerio.load(body)
-    
-    const loginFailed = $("div.error:contains('" + LOGIN_ERROR_MESSAGE + "')")
-    if (loginFailed.length) {
-      console.error('Login failed, please check your email address and password')
-      console.log('Login failed, please check your email address and password')
-      console.log('----------- Packt My Books Fetching Done --------------')
-      return
-    }
+    body: require('querystring').stringify(loginDetails),
+    resolveWithFullResponse: true,
+    simple: false,
+    transform: body => cheerio.load(body),
+  }
 
-    baseRequest('https://www.packtpub.com/account/my-ebooks', function (err, res, body) {
-      if (err) {
-        console.error('Request Error')
-        console.log('----------- Packt My Books Fetching Done --------------')
+  return baseRp(options)
+    .then($ => {
+      const loginFailureMessage = $("div.error:contains('" + LOGIN_ERROR_MESSAGE + "')")
+      const isLoginFailed = loginFailureMessage.length !== 0
+
+      if (isLoginFailed) {
+        console.log('Login failed, please check your email address and password')
+        logTitle('Process finished')      
         return
       }
 
-      scrape(body)
-        .then(bookData => {
-          console.log('Scraping is finished, save data!')
-          return saveDataFile(bookData)
-        })
-        .then((message) => {
-          console.log(message)
-          console.log('----------- Packt My Books Fetching Done --------------')
-        })
-        .catch(error => {
-          console.error(error)
-          console.log('----------- Packt My Books Fetching Done --------------')
-        })
+      logTitle('Login succeed')      
     })
+    .catch(error => {
+      console.error('Login failed', error)
+      logTitle('Process finished')      
+    })
+}
+
+const getLoginFormId = () => {
+  const options = {
+    uri: FREE_LEARNING_URL,
+    transform: body => cheerio.load(body),
+  }
+
+  return baseRp(options)
+    .then($ => $("input[type='hidden'][id^=form][value^=form]").val())
+    .catch(error => {
+      console.error('Request failed', error)
+      logTitle('Process finished')
+    })
+}
+
+const openMyEbooksPage = () => {
+  logTitle('Collecting ebooks')
+  const options = {
+    uri: MY_EBOOKS_URL,
+  }
+
+  return baseRp(options)
+    .catch(error => {
+      console.error('Request Error', error)
+      logTitle('Process finished')
+    })
+}
+
+loginToPackt()
+  .then(openMyEbooksPage)
+  .then(scrape)
+  .then(saveDataFile)
+  .then((message) => {
+    console.log(message)
+    logTitle('Process finished')
   })
-})
 
 type Book = {
   title: string

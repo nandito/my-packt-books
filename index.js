@@ -7,6 +7,7 @@ require('dotenv').load({
     path: __dirname + '/.env'
 });
 const request_1 = __importDefault(require("request"));
+const request_promise_1 = __importDefault(require("request-promise"));
 const cheerio_1 = __importDefault(require("cheerio"));
 const fs_1 = __importDefault(require("fs"));
 const data_file_saver_1 = require("./modules/data-file-saver");
@@ -15,59 +16,80 @@ const constants_1 = require("./constants");
 const baseRequest = request_1.default.defaults({
     jar: true
 });
-console.log('----------- Packt My Books Fetching Started -----------');
-baseRequest(constants_1.FREE_LEARNING_URL, function (err, res, body) {
-    if (err) {
-        console.error('Request failed');
-        console.log('----------- Packt My Books Fetching Done --------------');
-        return;
-    }
-    const $ = cheerio_1.default.load(body);
-    const newFormId = $("input[type='hidden'][id^=form][value^=form]").val();
-    if (newFormId) {
-        constants_1.loginDetails.form_build_id = newFormId;
-    }
-    baseRequest.post({
+const baseRp = request_promise_1.default.defaults({
+    jar: true
+});
+const logTitle = (title) => {
+    console.log(`----------- ${title} -----------`);
+};
+const loginToPackt = () => {
+    logTitle('Login started');
+    return getLoginFormId()
+        .then(loginFormId => {
+        if (loginFormId) {
+            constants_1.loginDetails.form_build_id = loginFormId;
+        }
+        return submitLoginCredentials();
+    });
+};
+const submitLoginCredentials = () => {
+    const options = {
         uri: constants_1.FREE_LEARNING_URL,
+        method: 'POST',
         headers: {
             'content-type': 'application/x-www-form-urlencoded'
         },
-        body: require('querystring').stringify(constants_1.loginDetails)
-    }, function (err, res, body) {
-        if (err) {
-            console.error('Login failed');
-            console.log('----------- Packt My Books Fetching Done --------------');
-            return;
-        }
-        const $ = cheerio_1.default.load(body);
-        const loginFailed = $("div.error:contains('" + constants_1.LOGIN_ERROR_MESSAGE + "')");
-        if (loginFailed.length) {
-            console.error('Login failed, please check your email address and password');
+        body: require('querystring').stringify(constants_1.loginDetails),
+        resolveWithFullResponse: true,
+        simple: false,
+        transform: body => cheerio_1.default.load(body),
+    };
+    return baseRp(options)
+        .then($ => {
+        const loginFailureMessage = $("div.error:contains('" + constants_1.LOGIN_ERROR_MESSAGE + "')");
+        const isLoginFailed = loginFailureMessage.length !== 0;
+        if (isLoginFailed) {
             console.log('Login failed, please check your email address and password');
-            console.log('----------- Packt My Books Fetching Done --------------');
+            logTitle('Process finished');
             return;
         }
-        baseRequest('https://www.packtpub.com/account/my-ebooks', function (err, res, body) {
-            if (err) {
-                console.error('Request Error');
-                console.log('----------- Packt My Books Fetching Done --------------');
-                return;
-            }
-            scrape(body)
-                .then(bookData => {
-                console.log('Scraping is finished, save data!');
-                return data_file_saver_1.saveDataFile(bookData);
-            })
-                .then((message) => {
-                console.log(message);
-                console.log('----------- Packt My Books Fetching Done --------------');
-            })
-                .catch(error => {
-                console.error(error);
-                console.log('----------- Packt My Books Fetching Done --------------');
-            });
-        });
+        logTitle('Login succeed');
+    })
+        .catch(error => {
+        console.error('Login failed', error);
+        logTitle('Process finished');
     });
+};
+const getLoginFormId = () => {
+    const options = {
+        uri: constants_1.FREE_LEARNING_URL,
+        transform: body => cheerio_1.default.load(body),
+    };
+    return baseRp(options)
+        .then($ => $("input[type='hidden'][id^=form][value^=form]").val())
+        .catch(error => {
+        console.error('Request failed', error);
+        logTitle('Process finished');
+    });
+};
+const openMyEbooksPage = () => {
+    logTitle('Collecting ebooks');
+    const options = {
+        uri: constants_1.MY_EBOOKS_URL,
+    };
+    return baseRp(options)
+        .catch(error => {
+        console.error('Request Error', error);
+        logTitle('Process finished');
+    });
+};
+loginToPackt()
+    .then(openMyEbooksPage)
+    .then(scrape)
+    .then(data_file_saver_1.saveDataFile)
+    .then((message) => {
+    console.log(message);
+    logTitle('Process finished');
 });
 function scrape(body) {
     let $ = cheerio_1.default.load(body);
