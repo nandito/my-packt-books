@@ -110,13 +110,6 @@ loginToPackt()
     logTitle('Process finished')
   })
 
-type Book = {
-  title: string
-  link: string
-  category: string
-  coverImageSrc: string
-}
-
 function scrape(body): Promise<Array<Book>> {
   let $ = cheerio.load(body)
   const productListLength = $('.product-line').length

@@ -1,14 +1,6 @@
 import fs from 'fs'
 import { PROJECT_ROOT } from '../constants'
 
-// TODO: share Book type between modules
-type Book = {
-  title: string
-  link: string
-  category: string
-  coverImageSrc: string
-}
-
 export const saveDataFile = (data: Array<Book>): Promise<string | NodeJS.ErrnoException> => {
   const output: string = `${PROJECT_ROOT}/data/data.json`
 
