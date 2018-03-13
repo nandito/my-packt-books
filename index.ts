@@ -7,17 +7,13 @@ import cheerio from 'cheerio'
 import fs from 'fs'
 import { saveDataFile } from './modules/data-file-saver'
 
-const loginDetails = {
-  email: process.env.PACKT_EMAIL,
-  password: process.env.PACKT_PASSWORD,
-  op: "Login",
-  form_id: "packt_user_login_form",
-  form_build_id: ""
-}
-export const PROJECT_ROOT = __dirname
-const LOGIN_ERROR_MESSAGE: string = 'Sorry, you entered an invalid email address and password combination.'
-const BASE_URL: string = 'https://www.packtpub.com'
-const FREE_LEARNING_URL: string = `${BASE_URL}/packt/offers/free-learning`
+import {
+  BASE_URL,
+  FREE_LEARNING_URL,
+  LOGIN_ERROR_MESSAGE,
+  PROJECT_ROOT,
+  loginDetails,
+} from './constants'
 
 //we need cookies for that, therefore let's turn JAR on
 const baseRequest = request.defaults({
@@ -113,7 +109,7 @@ function scrape(body): Promise<Array<Book>> {
       }
   
       const href = $(item).find('.product-thumbnail a').attr('href')
-      const link = 'https://www.packtpub.com' + href
+      const link = BASE_URL + href
       const category = href.split('/')[1]
       const safeName = href.split('/')[2]
       const coverUrl = $(item).find('.product-thumbnail img').attr('data-original')
@@ -139,7 +135,7 @@ function scrape(body): Promise<Array<Book>> {
 function getCover(coverUrl: string, filename: string) : Promise<string> {
   const extension : string = coverUrl.split('.').slice(-1)[0]
   const relativeSrc : string = `covers/${filename}.${extension}`
-  const output : fs.PathLike = `${__dirname}/data/${relativeSrc}`
+  const output : fs.PathLike = `${PROJECT_ROOT}/data/${relativeSrc}`
 
   return new Promise((resolve : (value : string) => void) => {
     if (!coverUrl || !filename) {

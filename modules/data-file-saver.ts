@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { PROJECT_ROOT } from '../index'
+import { PROJECT_ROOT } from '../constants'
 
 // TODO: share Book type between modules
 type Book = {

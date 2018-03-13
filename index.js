@@ -10,23 +10,13 @@ const request_1 = __importDefault(require("request"));
 const cheerio_1 = __importDefault(require("cheerio"));
 const fs_1 = __importDefault(require("fs"));
 const data_file_saver_1 = require("./modules/data-file-saver");
-const loginDetails = {
-    email: process.env.PACKT_EMAIL,
-    password: process.env.PACKT_PASSWORD,
-    op: "Login",
-    form_id: "packt_user_login_form",
-    form_build_id: ""
-};
-exports.PROJECT_ROOT = __dirname;
-const LOGIN_ERROR_MESSAGE = 'Sorry, you entered an invalid email address and password combination.';
-const BASE_URL = 'https://www.packtpub.com';
-const FREE_LEARNING_URL = `${BASE_URL}/packt/offers/free-learning`;
+const constants_1 = require("./constants");
 //we need cookies for that, therefore let's turn JAR on
 const baseRequest = request_1.default.defaults({
     jar: true
 });
 console.log('----------- Packt My Books Fetching Started -----------');
-baseRequest(FREE_LEARNING_URL, function (err, res, body) {
+baseRequest(constants_1.FREE_LEARNING_URL, function (err, res, body) {
     if (err) {
         console.error('Request failed');
         console.log('----------- Packt My Books Fetching Done --------------');
@@ -35,14 +25,14 @@ baseRequest(FREE_LEARNING_URL, function (err, res, body) {
     const $ = cheerio_1.default.load(body);
     const newFormId = $("input[type='hidden'][id^=form][value^=form]").val();
     if (newFormId) {
-        loginDetails.form_build_id = newFormId;
+        constants_1.loginDetails.form_build_id = newFormId;
     }
     baseRequest.post({
-        uri: FREE_LEARNING_URL,
+        uri: constants_1.FREE_LEARNING_URL,
         headers: {
             'content-type': 'application/x-www-form-urlencoded'
         },
-        body: require('querystring').stringify(loginDetails)
+        body: require('querystring').stringify(constants_1.loginDetails)
     }, function (err, res, body) {
         if (err) {
             console.error('Login failed');
@@ -50,7 +40,7 @@ baseRequest(FREE_LEARNING_URL, function (err, res, body) {
             return;
         }
         const $ = cheerio_1.default.load(body);
-        const loginFailed = $("div.error:contains('" + LOGIN_ERROR_MESSAGE + "')");
+        const loginFailed = $("div.error:contains('" + constants_1.LOGIN_ERROR_MESSAGE + "')");
         if (loginFailed.length) {
             console.error('Login failed, please check your email address and password');
             console.log('Login failed, please check your email address and password');
@@ -94,7 +84,7 @@ function scrape(body) {
                 return null;
             }
             const href = $(item).find('.product-thumbnail a').attr('href');
-            const link = 'https://www.packtpub.com' + href;
+            const link = constants_1.BASE_URL + href;
             const category = href.split('/')[1];
             const safeName = href.split('/')[2];
             const coverUrl = $(item).find('.product-thumbnail img').attr('data-original');
@@ -116,7 +106,7 @@ function scrape(body) {
 function getCover(coverUrl, filename) {
     const extension = coverUrl.split('.').slice(-1)[0];
     const relativeSrc = `covers/${filename}.${extension}`;
-    const output = `${__dirname}/data/${relativeSrc}`;
+    const output = `${constants_1.PROJECT_ROOT}/data/${relativeSrc}`;
     return new Promise((resolve) => {
         if (!coverUrl || !filename) {
             resolve('Cannot get cover.');
