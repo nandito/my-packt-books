@@ -9,6 +9,7 @@ require('dotenv').load({
 const request_1 = __importDefault(require("request"));
 const cheerio_1 = __importDefault(require("cheerio"));
 const fs_1 = __importDefault(require("fs"));
+const data_file_saver_1 = require("./modules/data-file-saver");
 const loginDetails = {
     email: process.env.PACKT_EMAIL,
     password: process.env.PACKT_PASSWORD,
@@ -16,6 +17,7 @@ const loginDetails = {
     form_id: "packt_user_login_form",
     form_build_id: ""
 };
+exports.PROJECT_ROOT = __dirname;
 const LOGIN_ERROR_MESSAGE = 'Sorry, you entered an invalid email address and password combination.';
 const BASE_URL = 'https://www.packtpub.com';
 const FREE_LEARNING_URL = `${BASE_URL}/packt/offers/free-learning`;
@@ -64,7 +66,7 @@ baseRequest(FREE_LEARNING_URL, function (err, res, body) {
             scrape(body)
                 .then(bookData => {
                 console.log('Scraping is finished, save data!');
-                return saveToFile(bookData);
+                return data_file_saver_1.saveDataFile(bookData);
             })
                 .then((message) => {
                 console.log(message);
@@ -77,18 +79,6 @@ baseRequest(FREE_LEARNING_URL, function (err, res, body) {
         });
     });
 });
-function saveToFile(data) {
-    const output = `${__dirname}/data/data.json`;
-    return new Promise((resolve, reject) => {
-        fs_1.default.writeFile(output, JSON.stringify(data, null, 2), (err) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-            resolve('File has been created!');
-        });
-    });
-}
 function scrape(body) {
     let $ = cheerio_1.default.load(body);
     const productListLength = $('.product-line').length;

@@ -5,6 +5,7 @@ require('dotenv').load({
 import request from 'request'
 import cheerio from 'cheerio'
 import fs from 'fs'
+import { saveDataFile } from './modules/data-file-saver'
 
 const loginDetails = {
   email: process.env.PACKT_EMAIL,
@@ -13,6 +14,7 @@ const loginDetails = {
   form_id: "packt_user_login_form",
   form_build_id: ""
 }
+export const PROJECT_ROOT = __dirname
 const LOGIN_ERROR_MESSAGE: string = 'Sorry, you entered an invalid email address and password combination.'
 const BASE_URL: string = 'https://www.packtpub.com'
 const FREE_LEARNING_URL: string = `${BASE_URL}/packt/offers/free-learning`
@@ -70,7 +72,7 @@ baseRequest(FREE_LEARNING_URL, function (err, res, body) {
       scrape(body)
         .then(bookData => {
           console.log('Scraping is finished, save data!')
-          return saveToFile(bookData)
+          return saveDataFile(bookData)
         })
         .then((message) => {
           console.log(message)
@@ -83,21 +85,6 @@ baseRequest(FREE_LEARNING_URL, function (err, res, body) {
     })
   })
 })
-
-function saveToFile(data: Array<Book>) : Promise<string | NodeJS.ErrnoException> {
-  const output: string = `${__dirname}/data/data.json`
-
-  return new Promise((resolve, reject) => {
-    fs.writeFile(output, JSON.stringify(data, null, 2), (err) => {
-      if (err) {
-        reject(err)
-  
-        return
-      }
-      resolve('File has been created!')
-    })
-  })
-}
 
 type Book = {
   title: string
