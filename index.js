@@ -9,8 +9,8 @@ require('dotenv').load({
 const request_1 = __importDefault(require("request"));
 const request_promise_1 = __importDefault(require("request-promise"));
 const cheerio_1 = __importDefault(require("cheerio"));
-const fs_1 = __importDefault(require("fs"));
 const data_file_saver_1 = require("./modules/data-file-saver");
+const cover_image_downloader_1 = __importDefault(require("./modules/cover-image-downloader"));
 const constants_1 = require("./constants");
 //we need cookies for that, therefore let's turn JAR on
 const baseRequest = request_1.default.defaults({
@@ -110,7 +110,7 @@ function scrape(body) {
             const category = href.split('/')[1];
             const safeName = href.split('/')[2];
             const coverUrl = $(item).find('.product-thumbnail img').attr('data-original');
-            getCover(coverUrl, safeName)
+            cover_image_downloader_1.default(coverUrl, safeName)
                 .then((coverImageSrc) => {
                 pageData.push({ title, link, category, coverImageSrc });
                 downloadedFiles += 1;
@@ -122,27 +122,6 @@ function scrape(body) {
                     resolve(pageData);
                 }
             });
-        });
-    });
-}
-function getCover(coverUrl, filename) {
-    const extension = coverUrl.split('.').slice(-1)[0];
-    const relativeSrc = `covers/${filename}.${extension}`;
-    const output = `${constants_1.PROJECT_ROOT}/data/${relativeSrc}`;
-    return new Promise((resolve) => {
-        if (!coverUrl || !filename) {
-            resolve('Cannot get cover.');
-        }
-        request_1.default(`https:${coverUrl}`, { timeout: 5000 })
-            .on('error', function () {
-            resolve(`Request failed getting file for ${filename}`);
-        })
-            .pipe(fs_1.default.createWriteStream(output))
-            .on('close', function () {
-            resolve(relativeSrc);
-        })
-            .on('error', function () {
-            resolve(`Failed downloading file for ${filename}`);
         });
     });
 }
