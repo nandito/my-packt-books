@@ -12,17 +12,18 @@ const cheerio_1 = __importDefault(require("cheerio"));
 const data_file_saver_1 = require("./modules/data-file-saver");
 const cover_image_downloader_1 = __importDefault(require("./modules/cover-image-downloader"));
 const title_logger_1 = __importDefault(require("./modules/title-logger"));
+const login_form_detector_1 = __importDefault(require("./modules/login/login-form-detector"));
 const constants_1 = require("./constants");
 //we need cookies for that, therefore let's turn JAR on
 const baseRequest = request_1.default.defaults({
     jar: true
 });
-const baseRp = request_promise_1.default.defaults({
+exports.baseRp = request_promise_1.default.defaults({
     jar: true
 });
 const loginToPackt = () => {
     title_logger_1.default('Login started');
-    return getLoginFormId()
+    return login_form_detector_1.default()
         .then(loginFormId => {
         if (loginFormId) {
             constants_1.loginDetails.form_build_id = loginFormId;
@@ -42,7 +43,7 @@ const submitLoginCredentials = () => {
         simple: false,
         transform: body => cheerio_1.default.load(body),
     };
-    return baseRp(options)
+    return exports.baseRp(options)
         .then($ => {
         const loginFailureMessage = $("div.error:contains('" + constants_1.LOGIN_ERROR_MESSAGE + "')");
         const isLoginFailed = loginFailureMessage.length !== 0;
@@ -58,24 +59,12 @@ const submitLoginCredentials = () => {
         title_logger_1.default('Process finished');
     });
 };
-const getLoginFormId = () => {
-    const options = {
-        uri: constants_1.FREE_LEARNING_URL,
-        transform: body => cheerio_1.default.load(body),
-    };
-    return baseRp(options)
-        .then($ => $("input[type='hidden'][id^=form][value^=form]").val())
-        .catch(error => {
-        console.error('Request failed', error);
-        title_logger_1.default('Process finished');
-    });
-};
 const openMyEbooksPage = () => {
     title_logger_1.default('Collecting ebooks');
     const options = {
         uri: constants_1.MY_EBOOKS_URL,
     };
-    return baseRp(options)
+    return exports.baseRp(options)
         .catch(error => {
         console.error('Request Error', error);
         title_logger_1.default('Process finished');

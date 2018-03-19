@@ -9,6 +9,7 @@ import fs from 'fs'
 import { saveDataFile } from './modules/data-file-saver'
 import downloadCoverImage from './modules/cover-image-downloader'
 import logTitle from './modules/title-logger'
+import getLoginFormId from './modules/login/login-form-detector'
 
 import {
   BASE_URL,
@@ -23,7 +24,8 @@ import {
 const baseRequest = request.defaults({
   jar: true
 })
-const baseRp = rp.defaults({
+
+export const baseRp = rp.defaults({
   jar: true
 })
 
@@ -69,20 +71,6 @@ const submitLoginCredentials = () => {
     .catch(error => {
       console.error('Login failed', error)
       logTitle('Process finished')      
-    })
-}
-
-const getLoginFormId = () => {
-  const options = {
-    uri: FREE_LEARNING_URL,
-    transform: body => cheerio.load(body),
-  }
-
-  return baseRp(options)
-    .then($ => $("input[type='hidden'][id^=form][value^=form]").val())
-    .catch(error => {
-      console.error('Request failed', error)
-      logTitle('Process finished')
     })
 }
 
