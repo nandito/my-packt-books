@@ -8,6 +8,7 @@ import cheerio from 'cheerio'
 import fs from 'fs'
 import { saveDataFile } from './modules/data-file-saver'
 import downloadCoverImage from './modules/cover-image-downloader'
+import logTitle from './modules/title-logger'
 
 import {
   BASE_URL,
@@ -25,10 +26,6 @@ const baseRequest = request.defaults({
 const baseRp = rp.defaults({
   jar: true
 })
-
-const logTitle = (title) => {
-  console.log(`----------- ${title} -----------`)
-}
 
 const loginToPackt = () => {
   logTitle('Login started')

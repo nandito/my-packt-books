@@ -11,6 +11,7 @@ const request_promise_1 = __importDefault(require("request-promise"));
 const cheerio_1 = __importDefault(require("cheerio"));
 const data_file_saver_1 = require("./modules/data-file-saver");
 const cover_image_downloader_1 = __importDefault(require("./modules/cover-image-downloader"));
+const title_logger_1 = __importDefault(require("./modules/title-logger"));
 const constants_1 = require("./constants");
 //we need cookies for that, therefore let's turn JAR on
 const baseRequest = request_1.default.defaults({
@@ -19,11 +20,8 @@ const baseRequest = request_1.default.defaults({
 const baseRp = request_promise_1.default.defaults({
     jar: true
 });
-const logTitle = (title) => {
-    console.log(`----------- ${title} -----------`);
-};
 const loginToPackt = () => {
-    logTitle('Login started');
+    title_logger_1.default('Login started');
     return getLoginFormId()
         .then(loginFormId => {
         if (loginFormId) {
@@ -50,14 +48,14 @@ const submitLoginCredentials = () => {
         const isLoginFailed = loginFailureMessage.length !== 0;
         if (isLoginFailed) {
             console.log('Login failed, please check your email address and password');
-            logTitle('Process finished');
+            title_logger_1.default('Process finished');
             return;
         }
-        logTitle('Login succeed');
+        title_logger_1.default('Login succeed');
     })
         .catch(error => {
         console.error('Login failed', error);
-        logTitle('Process finished');
+        title_logger_1.default('Process finished');
     });
 };
 const getLoginFormId = () => {
@@ -69,18 +67,18 @@ const getLoginFormId = () => {
         .then($ => $("input[type='hidden'][id^=form][value^=form]").val())
         .catch(error => {
         console.error('Request failed', error);
-        logTitle('Process finished');
+        title_logger_1.default('Process finished');
     });
 };
 const openMyEbooksPage = () => {
-    logTitle('Collecting ebooks');
+    title_logger_1.default('Collecting ebooks');
     const options = {
         uri: constants_1.MY_EBOOKS_URL,
     };
     return baseRp(options)
         .catch(error => {
         console.error('Request Error', error);
-        logTitle('Process finished');
+        title_logger_1.default('Process finished');
     });
 };
 loginToPackt()
@@ -89,7 +87,7 @@ loginToPackt()
     .then(data_file_saver_1.saveDataFile)
     .then((message) => {
     console.log(message);
-    logTitle('Process finished');
+    title_logger_1.default('Process finished');
 });
 function scrape(body) {
     let $ = cheerio_1.default.load(body);
