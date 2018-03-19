@@ -9,17 +9,9 @@ import fs from 'fs'
 import { saveDataFile } from './modules/data-file-saver'
 import downloadCoverImage from './modules/cover-image-downloader'
 import logTitle from './modules/title-logger'
-import getLoginFormId from './modules/login/login-form-detector'
-import submitLoginCredentials from './modules/login/submit-credentials'
+import loginToPackt from './modules/login'
 
-import {
-  BASE_URL,
-  FREE_LEARNING_URL,
-  LOGIN_ERROR_MESSAGE,
-  MY_EBOOKS_URL,
-  PROJECT_ROOT,
-  loginDetails,
-} from './constants'
+import { BASE_URL, MY_EBOOKS_URL } from './constants'
 
 //we need cookies for that, therefore let's turn JAR on
 const baseRequest = request.defaults({
@@ -29,51 +21,6 @@ const baseRequest = request.defaults({
 export const baseRp = rp.defaults({
   jar: true
 })
-
-const loginToPackt = () => {
-  logTitle('Login started')
-  
-  return getLoginFormId()
-    .then(loginFormId => {
-      if (loginFormId) {
-        loginDetails.form_build_id = loginFormId
-      }
-
-      return submitLoginCredentials()
-    })
-}
-
-// const submitLoginCredentials = () => {
-//   const options = {
-//     uri: FREE_LEARNING_URL,
-//     method: 'POST',
-//     headers: {
-//       'content-type': 'application/x-www-form-urlencoded'
-//     },
-//     body: require('querystring').stringify(loginDetails),
-//     resolveWithFullResponse: true,
-//     simple: false,
-//     transform: body => cheerio.load(body),
-//   }
-
-//   return baseRp(options)
-//     .then($ => {
-//       const loginFailureMessage = $("div.error:contains('" + LOGIN_ERROR_MESSAGE + "')")
-//       const isLoginFailed = loginFailureMessage.length !== 0
-
-//       if (isLoginFailed) {
-//         console.log('Login failed, please check your email address and password')
-//         logTitle('Process finished')      
-//         return
-//       }
-
-//       logTitle('Login succeed')      
-//     })
-//     .catch(error => {
-//       console.error('Login failed', error)
-//       logTitle('Process finished')      
-//     })
-// }
 
 const openMyEbooksPage = () => {
   logTitle('Collecting ebooks')

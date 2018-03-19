@@ -12,8 +12,7 @@ const cheerio_1 = __importDefault(require("cheerio"));
 const data_file_saver_1 = require("./modules/data-file-saver");
 const cover_image_downloader_1 = __importDefault(require("./modules/cover-image-downloader"));
 const title_logger_1 = __importDefault(require("./modules/title-logger"));
-const login_form_detector_1 = __importDefault(require("./modules/login/login-form-detector"));
-const submit_credentials_1 = __importDefault(require("./modules/login/submit-credentials"));
+const login_1 = __importDefault(require("./modules/login"));
 const constants_1 = require("./constants");
 //we need cookies for that, therefore let's turn JAR on
 const baseRequest = request_1.default.defaults({
@@ -22,44 +21,6 @@ const baseRequest = request_1.default.defaults({
 exports.baseRp = request_promise_1.default.defaults({
     jar: true
 });
-const loginToPackt = () => {
-    title_logger_1.default('Login started');
-    return login_form_detector_1.default()
-        .then(loginFormId => {
-        if (loginFormId) {
-            constants_1.loginDetails.form_build_id = loginFormId;
-        }
-        return submit_credentials_1.default();
-    });
-};
-// const submitLoginCredentials = () => {
-//   const options = {
-//     uri: FREE_LEARNING_URL,
-//     method: 'POST',
-//     headers: {
-//       'content-type': 'application/x-www-form-urlencoded'
-//     },
-//     body: require('querystring').stringify(loginDetails),
-//     resolveWithFullResponse: true,
-//     simple: false,
-//     transform: body => cheerio.load(body),
-//   }
-//   return baseRp(options)
-//     .then($ => {
-//       const loginFailureMessage = $("div.error:contains('" + LOGIN_ERROR_MESSAGE + "')")
-//       const isLoginFailed = loginFailureMessage.length !== 0
-//       if (isLoginFailed) {
-//         console.log('Login failed, please check your email address and password')
-//         logTitle('Process finished')      
-//         return
-//       }
-//       logTitle('Login succeed')      
-//     })
-//     .catch(error => {
-//       console.error('Login failed', error)
-//       logTitle('Process finished')      
-//     })
-// }
 const openMyEbooksPage = () => {
     title_logger_1.default('Collecting ebooks');
     const options = {
@@ -71,7 +32,7 @@ const openMyEbooksPage = () => {
         title_logger_1.default('Process finished');
     });
 };
-loginToPackt()
+login_1.default()
     .then(openMyEbooksPage)
     .then(scrape)
     .then(data_file_saver_1.saveDataFile)
