@@ -13,6 +13,7 @@ const data_file_saver_1 = require("./modules/data-file-saver");
 const cover_image_downloader_1 = __importDefault(require("./modules/cover-image-downloader"));
 const title_logger_1 = __importDefault(require("./modules/title-logger"));
 const login_form_detector_1 = __importDefault(require("./modules/login/login-form-detector"));
+const submit_credentials_1 = __importDefault(require("./modules/login/submit-credentials"));
 const constants_1 = require("./constants");
 //we need cookies for that, therefore let's turn JAR on
 const baseRequest = request_1.default.defaults({
@@ -28,37 +29,37 @@ const loginToPackt = () => {
         if (loginFormId) {
             constants_1.loginDetails.form_build_id = loginFormId;
         }
-        return submitLoginCredentials();
+        return submit_credentials_1.default();
     });
 };
-const submitLoginCredentials = () => {
-    const options = {
-        uri: constants_1.FREE_LEARNING_URL,
-        method: 'POST',
-        headers: {
-            'content-type': 'application/x-www-form-urlencoded'
-        },
-        body: require('querystring').stringify(constants_1.loginDetails),
-        resolveWithFullResponse: true,
-        simple: false,
-        transform: body => cheerio_1.default.load(body),
-    };
-    return exports.baseRp(options)
-        .then($ => {
-        const loginFailureMessage = $("div.error:contains('" + constants_1.LOGIN_ERROR_MESSAGE + "')");
-        const isLoginFailed = loginFailureMessage.length !== 0;
-        if (isLoginFailed) {
-            console.log('Login failed, please check your email address and password');
-            title_logger_1.default('Process finished');
-            return;
-        }
-        title_logger_1.default('Login succeed');
-    })
-        .catch(error => {
-        console.error('Login failed', error);
-        title_logger_1.default('Process finished');
-    });
-};
+// const submitLoginCredentials = () => {
+//   const options = {
+//     uri: FREE_LEARNING_URL,
+//     method: 'POST',
+//     headers: {
+//       'content-type': 'application/x-www-form-urlencoded'
+//     },
+//     body: require('querystring').stringify(loginDetails),
+//     resolveWithFullResponse: true,
+//     simple: false,
+//     transform: body => cheerio.load(body),
+//   }
+//   return baseRp(options)
+//     .then($ => {
+//       const loginFailureMessage = $("div.error:contains('" + LOGIN_ERROR_MESSAGE + "')")
+//       const isLoginFailed = loginFailureMessage.length !== 0
+//       if (isLoginFailed) {
+//         console.log('Login failed, please check your email address and password')
+//         logTitle('Process finished')      
+//         return
+//       }
+//       logTitle('Login succeed')      
+//     })
+//     .catch(error => {
+//       console.error('Login failed', error)
+//       logTitle('Process finished')      
+//     })
+// }
 const openMyEbooksPage = () => {
     title_logger_1.default('Collecting ebooks');
     const options = {

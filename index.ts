@@ -10,6 +10,7 @@ import { saveDataFile } from './modules/data-file-saver'
 import downloadCoverImage from './modules/cover-image-downloader'
 import logTitle from './modules/title-logger'
 import getLoginFormId from './modules/login/login-form-detector'
+import submitLoginCredentials from './modules/login/submit-credentials'
 
 import {
   BASE_URL,
@@ -42,37 +43,37 @@ const loginToPackt = () => {
     })
 }
 
-const submitLoginCredentials = () => {
-  const options = {
-    uri: FREE_LEARNING_URL,
-    method: 'POST',
-    headers: {
-      'content-type': 'application/x-www-form-urlencoded'
-    },
-    body: require('querystring').stringify(loginDetails),
-    resolveWithFullResponse: true,
-    simple: false,
-    transform: body => cheerio.load(body),
-  }
+// const submitLoginCredentials = () => {
+//   const options = {
+//     uri: FREE_LEARNING_URL,
+//     method: 'POST',
+//     headers: {
+//       'content-type': 'application/x-www-form-urlencoded'
+//     },
+//     body: require('querystring').stringify(loginDetails),
+//     resolveWithFullResponse: true,
+//     simple: false,
+//     transform: body => cheerio.load(body),
+//   }
 
-  return baseRp(options)
-    .then($ => {
-      const loginFailureMessage = $("div.error:contains('" + LOGIN_ERROR_MESSAGE + "')")
-      const isLoginFailed = loginFailureMessage.length !== 0
+//   return baseRp(options)
+//     .then($ => {
+//       const loginFailureMessage = $("div.error:contains('" + LOGIN_ERROR_MESSAGE + "')")
+//       const isLoginFailed = loginFailureMessage.length !== 0
 
-      if (isLoginFailed) {
-        console.log('Login failed, please check your email address and password')
-        logTitle('Process finished')      
-        return
-      }
+//       if (isLoginFailed) {
+//         console.log('Login failed, please check your email address and password')
+//         logTitle('Process finished')      
+//         return
+//       }
 
-      logTitle('Login succeed')      
-    })
-    .catch(error => {
-      console.error('Login failed', error)
-      logTitle('Process finished')      
-    })
-}
+//       logTitle('Login succeed')      
+//     })
+//     .catch(error => {
+//       console.error('Login failed', error)
+//       logTitle('Process finished')      
+//     })
+// }
 
 const openMyEbooksPage = () => {
   logTitle('Collecting ebooks')
