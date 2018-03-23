@@ -1,12 +1,12 @@
 import cheerio from 'cheerio'
+import Bluebird from 'bluebird'
 import { baseRp } from '../../index'
 import logTitle from '../title-logger'
 import {
   FREE_LEARNING_URL,
 } from '../../constants'
 
-
-export default () => {
+export default (): Bluebird<string> => {
   const options = {
     uri: FREE_LEARNING_URL,
     transform: body => cheerio.load(body),

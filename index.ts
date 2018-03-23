@@ -5,7 +5,6 @@ require('dotenv').load({
 import request from 'request'
 import rp from 'request-promise'
 import cheerio from 'cheerio'
-import fs from 'fs'
 import { saveDataFile } from './modules/data-file-saver'
 import downloadCoverImage from './modules/cover-image-downloader'
 import logTitle from './modules/title-logger'
@@ -13,12 +12,11 @@ import loginToPackt from './modules/login'
 
 import { BASE_URL, MY_EBOOKS_URL } from './constants'
 
-//we need cookies for that, therefore let's turn JAR on
-const baseRequest = request.defaults({
-  jar: true
-})
-
-export const baseRp = rp.defaults({
+export const baseRp: request.RequestAPI<
+  rp.RequestPromise,
+  rp.RequestPromiseOptions,
+  request.RequiredUriUrl
+> = rp.defaults({
   jar: true
 })
 
@@ -54,7 +52,7 @@ function scrape(body): Promise<Array<Book>> {
   let falseItems = 0
 
   return new Promise((resolve) => {
-    $('.product-line').each((index, item) => {
+    $('.product-line').each((_, item) => {
       const title = $(item).find('.title').text().trim()
   
       if (!title) {

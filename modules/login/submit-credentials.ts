@@ -1,4 +1,5 @@
 import cheerio from 'cheerio'
+import Bluebird from 'bluebird'
 import { baseRp } from '../../index'
 import {
   FREE_LEARNING_URL,
@@ -7,7 +8,7 @@ import {
 } from '../../constants'
 import logTitle from '../title-logger'
 
-export default () => {
+export default (): Bluebird<void> => {
   const options = {
     uri: FREE_LEARNING_URL,
     method: 'POST',
