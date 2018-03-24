@@ -14,7 +14,8 @@
     "dotenv": "^5.0.1",
     "listr": "^0.13.0",
     "request": "^2.83.0",
-    "request-promise": "^4.2.2"
+    "request-promise": "^4.2.2",
+    "rxjs": "^5.5.7"
   },
   "scripts": {
     "start": "node -r dotenv/config ./lib/index.js"

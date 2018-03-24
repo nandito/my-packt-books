@@ -6,7 +6,6 @@ import {
   LOGIN_ERROR_MESSAGE,
   loginDetails,
 } from '../../constants'
-import logTitle from '../logTitle'
 
 export default (): Bluebird<void> | Promise<void> => {
   const isCredentialsProvided = loginDetails.email && loginDetails.password
@@ -33,15 +32,7 @@ export default (): Bluebird<void> | Promise<void> => {
       const isLoginFailed = loginFailureMessage.length !== 0
 
       if (isLoginFailed) {
-        console.log('Login failed, please check your email address and password')
-        logTitle('Process finished')
-        return
+        Promise.reject('Login failed, please check your email address and password')
       }
-
-      logTitle('Login succeed')
-    })
-    .catch(error => {
-      console.error('Login failed', error)
-      logTitle('Process finished')
     })
 }

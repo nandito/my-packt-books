@@ -1,6 +1,7 @@
 import request from 'request'
 import rp from 'request-promise'
 import Listr from 'listr'
+import { Observable } from 'rxjs/Observable'
 import saveDataFile from './modules/saveDataFile'
 import openMyEbooksPage from './modules/openMyEbooksPage'
 import scrapeBookData from './modules/scrapeBookData'
@@ -34,12 +35,12 @@ const tasks = new Listr([
   },
   {
     title: 'Scrape book data',
-    task: ctx => new Promise(resolve => {
-      scrapeBookData(ctx.ebooksPageBody)
+    task: ctx => Observable.create(observer => {
+      scrapeBookData(ctx.ebooksPageBody, observer)
         .then(data => {
           ctx.booksData = data
 
-          return resolve()
+          observer.complete()
         })
     })
   },
@@ -52,6 +53,11 @@ const tasks = new Listr([
   },
 ])
 
-tasks.run().catch(err => {
-  console.error(err)
-})
+tasks.run()
+  .then(ctx => {
+    console.log('🎉 Download is finished!')
+    console.log(`📚 ${ctx.booksData.length} book info is saved to the data file`)
+  })
+  .catch(err => {
+    console.error(err)
+  })
