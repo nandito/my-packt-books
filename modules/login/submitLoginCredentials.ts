@@ -6,7 +6,7 @@ import {
   LOGIN_ERROR_MESSAGE,
   loginDetails,
 } from '../../constants'
-import logTitle from '../title-logger'
+import logTitle from '../logTitle'
 
 export default (): Bluebird<void> | Promise<void> => {
   const isCredentialsProvided = loginDetails.email && loginDetails.password

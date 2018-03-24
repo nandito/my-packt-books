@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird'
-import logTitle from './title-logger'
+import logTitle from './logTitle'
 import { MY_EBOOKS_URL } from '../constants'
 import { baseRp } from '../index'
 

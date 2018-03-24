@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird'
-import getLoginFormId from './login-form-detector'
-import submitLoginCredentials from './submit-credentials'
-import logTitle from '../title-logger'
+import getLoginFormId from './getLoginFormId'
+import submitLoginCredentials from './submitLoginCredentials'
+import logTitle from '../logTitle'
 import { loginDetails } from '../../constants'
 
 export default (): Bluebird<void> => {

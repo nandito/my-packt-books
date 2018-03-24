@@ -2,7 +2,7 @@ import fs from 'fs'
 import request from 'request'
 import { PROJECT_ROOT } from '../constants'
 
-const downloadCoverImage = (coverUrl: string, filename: string): Promise<string> => {
+export default (coverUrl: string, filename: string): Promise<string> => {
   const extension: string = coverUrl.split('.').slice(-1)[0]
   const relativeSrc: string = `covers/${filename}.${extension}`
   const output: fs.PathLike = `${PROJECT_ROOT}/data/${relativeSrc}`
@@ -25,5 +25,3 @@ const downloadCoverImage = (coverUrl: string, filename: string): Promise<string>
       })
   })
 }
-
-export default downloadCoverImage

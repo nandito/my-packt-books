@@ -1,7 +1,7 @@
 import cheerio from 'cheerio'
 import Bluebird from 'bluebird'
 import { baseRp } from '../../index'
-import logTitle from '../title-logger'
+import logTitle from '../logTitle'
 import {
   FREE_LEARNING_URL,
 } from '../../constants'

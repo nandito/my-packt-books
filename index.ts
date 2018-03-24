@@ -1,9 +1,9 @@
 import request from 'request'
 import rp from 'request-promise'
-import { saveDataFile } from './modules/data-file-saver'
+import saveDataFile from './modules/saveDataFile'
 import openMyEbooksPage from './modules/openMyEbooksPage'
 import scrapeBookData from './modules/scrapeBookData'
-import logTitle from './modules/title-logger'
+import logTitle from './modules/logTitle'
 import loginToPackt from './modules/login'
 
 export const baseRp: request.RequestAPI<

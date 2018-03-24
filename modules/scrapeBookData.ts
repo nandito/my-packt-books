@@ -1,5 +1,5 @@
 import cheerio from 'cheerio'
-import downloadCoverImage from './cover-image-downloader'
+import downloadCoverImage from './downloadCoverImage'
 import { BASE_URL } from '../constants'
 
 export default (body): Promise<Array<Book>> => {

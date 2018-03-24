@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { PROJECT_ROOT } from '../constants'
 
-export const saveDataFile = (data: Array<Book>): Promise<string | NodeJS.ErrnoException> => {
+export default (data: Array<Book>): Promise<string | NodeJS.ErrnoException> => {
   const output: string = `${PROJECT_ROOT}/data/data.json`
 
   return new Promise((resolve, reject) => {
