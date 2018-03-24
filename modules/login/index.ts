@@ -15,4 +15,7 @@ export default (): Bluebird<void> => {
 
       return submitLoginCredentials()
     })
+    .catch(error => {
+      return Promise.reject(error)
+    })
 }

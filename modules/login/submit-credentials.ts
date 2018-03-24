@@ -8,7 +8,13 @@ import {
 } from '../../constants'
 import logTitle from '../title-logger'
 
-export default (): Bluebird<void> => {
+export default (): Bluebird<void> | Promise<void> => {
+  const isCredentialsProvided = loginDetails.email && loginDetails.password
+
+  if (!isCredentialsProvided) {
+    return Promise.reject('Login credentials are missing')
+  }
+  
   const options = {
     uri: FREE_LEARNING_URL,
     method: 'POST',

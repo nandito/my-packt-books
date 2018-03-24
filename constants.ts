@@ -1,4 +1,4 @@
-export const PROJECT_ROOT = __dirname
+export const PROJECT_ROOT = __dirname + '/..'
 
 export const BASE_URL: string = 'https://www.packtpub.com'
 export const FREE_LEARNING_URL: string = `${BASE_URL}/packt/offers/free-learning`

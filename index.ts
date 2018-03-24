@@ -1,7 +1,3 @@
-require('dotenv').load({
-  path: __dirname + '/.env'
-})
-
 import request from 'request'
 import rp from 'request-promise'
 import cheerio from 'cheerio'
@@ -39,6 +35,10 @@ loginToPackt()
   .then(saveDataFile)
   .then((message) => {
     console.log(message)
+    logTitle('Process finished')
+  })
+  .catch(error => {
+    console.log('Error', error)
     logTitle('Process finished')
   })
 
