@@ -2,10 +2,9 @@ import cheerio from 'cheerio'
 import downloadCoverImage from './downloadCoverImage'
 import { BASE_URL } from '../constants'
 
-export default (body): Promise<Array<Book>> => {
+export default (body, observer): Promise<Array<Book>> => {
   let $ = cheerio.load(body)
   const productListLength = $('.product-line').length
-  console.log('productListLength: ', productListLength)
 
   const pageData: Array<Book> = []
   let downloadedFiles = 0
@@ -31,13 +30,9 @@ export default (body): Promise<Array<Book>> => {
         .then((coverImageSrc) => {
           pageData.push({ title, link, category, coverImageSrc })
           downloadedFiles += 1
-          console.log('Download success: ', downloadedFiles, title)
+          observer.next(`Download success: ${downloadedFiles} ${title}`)
 
           if (downloadedFiles === (productListLength - falseItems)) {
-            console.log('Download is finished!')
-            console.log('downloadedFiles: ', downloadedFiles)
-            console.log('falseItems: ', falseItems)
-
             resolve(pageData)
           }
         })
