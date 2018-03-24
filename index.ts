@@ -2,11 +2,12 @@ import request from 'request'
 import rp from 'request-promise'
 import cheerio from 'cheerio'
 import { saveDataFile } from './modules/data-file-saver'
+import openMyEbooksPage from './modules/openMyEbooksPage'
 import downloadCoverImage from './modules/cover-image-downloader'
 import logTitle from './modules/title-logger'
 import loginToPackt from './modules/login'
 
-import { BASE_URL, MY_EBOOKS_URL } from './constants'
+import { BASE_URL } from './constants'
 
 export const baseRp: request.RequestAPI<
   rp.RequestPromise,
@@ -15,19 +16,6 @@ export const baseRp: request.RequestAPI<
 > = rp.defaults({
   jar: true
 })
-
-const openMyEbooksPage = () => {
-  logTitle('Collecting ebooks')
-  const options = {
-    uri: MY_EBOOKS_URL,
-  }
-
-  return baseRp(options)
-    .catch(error => {
-      console.error('Request Error', error)
-      logTitle('Process finished')
-    })
-}
 
 loginToPackt()
   .then(openMyEbooksPage)
